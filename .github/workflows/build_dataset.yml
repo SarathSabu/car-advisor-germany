@@ -1,0 +1,33 @@
+name: Build Germany Car Database
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'data/raw/**'
+
+jobs:
+  build-db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build dataset
+        run: python cars_db_germany_builder.py
+
+      - name: Commit updated DB
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add data/cars_db_germany.csv
+          git commit -m "Updated dataset" || echo "No changes"
+          git push
